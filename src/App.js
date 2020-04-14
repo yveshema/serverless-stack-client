@@ -9,11 +9,13 @@ import { Auth } from 'aws-amplify';
 import { AppContext } from './libs/contextLib';
 
 import './App.css';
+import { onError } from './libs/errorLib';
 
 function App() {
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [isAuthenticated, userHasAuthenticated] = useState(false);
-  const history = useHistory();
+
+  const history = useHistory();  
 
   useEffect(() => {
     onLoad();
@@ -26,17 +28,17 @@ function App() {
     }
     catch (e) {
       if (e !== 'No current user') {
-        alert(e);
-      }
+        onError(e);
+      }      
     }
-    setIsAuthenticating(false);
+    setIsAuthenticating(false);    
   }
 
   async function handleLogout(){
     await Auth.signOut();
     userHasAuthenticated(false);
     history.push('/login');
-  }
+  }  
 
   return(
     !isAuthenticating &&
@@ -50,9 +52,14 @@ function App() {
         </Navbar.Header>
         <Navbar.Collapse>
           <Nav pullRight>
-            { isAuthenticated
-              ? <NavItem onClick={handleLogout}>Logout</NavItem>
-              : <>
+            { isAuthenticated ? (
+              <>
+              <LinkContainer to="/settings">
+                <NavItem>Settings</NavItem>
+              </LinkContainer>
+              <NavItem onClick={handleLogout}>Logout</NavItem>
+              </>
+            ): (<>
                   <LinkContainer to="/signup">
                     <NavItem>Signup</NavItem>
                   </LinkContainer>
@@ -60,7 +67,7 @@ function App() {
                     <NavItem>Login</NavItem>
                   </LinkContainer>
                 </>
-            }            
+            )}            
           </Nav>
         </Navbar.Collapse>
       </Navbar>
